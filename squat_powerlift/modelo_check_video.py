@@ -125,4 +125,4 @@ def test_pose(video_path):
 
 
 # ejemplo
-test_pose("videos_ejercicios/squat_frontal_5.mp4")
+test_pose("videos_ejercicios/squat_frontal_6.mp4")

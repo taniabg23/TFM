@@ -141,7 +141,7 @@ def pad_sequences(X, max_len=60):
 
 
 # pipeline
-X, y = load_dataset("datasets")
+X, y = load_dataset("../datasets")
 
 if len(X) == 0:
     raise ValueError("No se han cargado datos.")

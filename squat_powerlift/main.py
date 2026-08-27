@@ -11,7 +11,7 @@ MAX_LEN = 60
 
 
 # Cargamos el modelo entrenado
-model = tf.keras.models.load_model("squat_model.keras")
+model = tf.keras.models.load_model("./trains/squat_model.h5")
 
 
 # Extraemos los landmarks del video 
@@ -25,6 +25,8 @@ sequence = np.array(sequence)
 
 # Reshapeamos la secuencia para que tenga la forma (num_frames, num_landmarks*3)
 seq = sequence.reshape(len(sequence), -1)
+
+print("SEQ SHAPE:", seq)
 
 if len(seq) > MAX_LEN:
     seq = seq[:MAX_LEN]
