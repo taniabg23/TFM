@@ -5,13 +5,65 @@ from landmarks_squat import extract_landmarks_from_video
 
 
 MODEL_PATH = "../modelo_mediapipe/pose_landmarker_full.task"
-VIDEO_PATH = "videos_ejercicios/squat_frontal_2.mp4"
+VIDEO_PATH = "videos_ejercicios/squat_frontal_1.mp4"
 
 MAX_LEN = 60
 
 
+# Definimos la capa Attention utilizada durante el entrenamiento
+class Attention(tf.keras.layers.Layer):
+
+    def __init__(self, **kwargs):
+
+        super(Attention, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        self.W = self.add_weight(
+            shape=(input_shape[-1], 1),
+            initializer="random_normal",
+            trainable=True
+        )
+
+        self.b = self.add_weight(
+            shape=(input_shape[1], 1),
+            initializer="zeros",
+            trainable=True
+        )
+
+        super(Attention, self).build(input_shape)
+
+    def call(self, x):
+
+        e = tf.tanh(
+            tf.matmul(x, self.W) + self.b
+        )
+
+        e = tf.squeeze(
+            e,
+            axis=-1
+        )
+
+        alpha = tf.nn.softmax(
+            e,
+            axis=1
+        )
+
+        context = tf.reduce_sum(
+            x * tf.expand_dims(alpha, -1),
+            axis=1
+        )
+
+        return context
+
+
 # Cargamos el modelo entrenado
-model = tf.keras.models.load_model("./trains/models/squat_model_final_1.keras")
+model = tf.keras.models.load_model(
+    "./squat_model_best.keras",
+    custom_objects={
+        "Attention": Attention
+    }
+)
 
 
 # Extraemos los landmarks separados por repeticiones
@@ -31,7 +83,10 @@ for i, rep in enumerate(repetitions):
     print(f"\nEvaluando repetición {i + 1}...")
 
     # Reshapeamos la repetición para que tenga la forma (num_frames, num_landmarks*3)
-    seq = rep.reshape(len(rep), -1).astype(np.float32)
+    seq = rep.reshape(
+        len(rep),
+        -1
+    ).astype(np.float32)
 
     # Ajustamos la longitud de la repetición
     if len(seq) > MAX_LEN:
